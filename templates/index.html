@@ -4,6 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Engine Simulation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4A90E2;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #4A90E2;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            background-color: #4A90E2;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+        }
+
+        h2 {
+            text-align: center;
+            color: #4A90E2;
+            margin-top: 40px;
+        }
+
+        #searchResults {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #searchResults div {
+            background-color: #fff;
+            margin: 15px 0;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #searchResults div:hover {
+            transform: scale(1.02);
+        }
+
+        h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        small {
+            color: #999;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            form {
+                padding: 15px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Search Engine Simulation</h1>
@@ -16,61 +130,60 @@
     <div id="searchResults"></div>
 
     <script>
- document.getElementById('searchForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const query = document.getElementById('searchQuery').value;
-    const topN = document.getElementById('topN').value;
+        // JavaScript code remains unchanged
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchQuery').value;
+            const topN = document.getElementById('topN').value;
 
-    fetch('/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ query: query, top_n: topN })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data); // Log the data to inspect the structure
-        const resultsContainer = document.getElementById('searchResults');
-        resultsContainer.innerHTML = '';  // Clear previous results
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query, top_n: topN })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Log the data to inspect the structure
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = '';  // Clear previous results
 
-        if (data.message) {
-            resultsContainer.innerText = data.message;
-        } else if (data.error) {
-            resultsContainer.innerText = data.error;
-        } else {
-            let resultsFound = false;
+                if (data.message) {
+                    resultsContainer.innerText = data.message;
+                } else if (data.error) {
+                    resultsContainer.innerText = data.error;
+                } else {
+                    let resultsFound = false;
 
-            data.forEach(result => {
-                const resultDiv = document.createElement('div');
-                
-                // Check if the result is valid
-                if (result[1] && result[2]) {
-                    const similarityScore = result[0] ? result[0].toFixed(2) : 'N/A';
-                    
-                    resultDiv.innerHTML = `
-                        <h3>${result[1]}</h3>
-                        <p>${result[2]}</p>
-                        <p><small>Similarity Score: ${similarityScore}</small></p>
-                    `;
-                    resultsContainer.appendChild(resultDiv);
-                    resultsFound = true;
+                    data.forEach(result => {
+                        const resultDiv = document.createElement('div');
+                        
+                        // Check if the result is valid
+                        if (result[1] && result[2]) {
+                            const similarityScore = result[0] ? result[0].toFixed(2) : 'N/A';
+                            
+                            resultDiv.innerHTML = `
+                                <h3>${result[1]}</h3>
+                                <p>${result[2]}</p>
+                                <p><small>Similarity Score: ${similarityScore}</small></p>
+                            `;
+                            resultsContainer.appendChild(resultDiv);
+                            resultsFound = true;
+                        }
+                    });
+
+                    // If no valid results were found, display "No relevant search"
+                    if (!resultsFound) {
+                        resultsContainer.innerText = 'No relevant search';
+                    }
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching results:', error);
+                document.getElementById('searchResults').innerText = 'Error fetching results.';
             });
-
-            // If no valid results were found, display "No relevant search"
-            if (!resultsFound) {
-                resultsContainer.innerText = 'No relevant search';
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching results:', error);
-        document.getElementById('searchResults').innerText = 'Error fetching results.';
-    });
-});
-
-
+        });
     </script>
 </body>
 </html>
